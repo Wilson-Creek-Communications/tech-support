@@ -3,8 +3,6 @@
 ###################
 
 # A general error, typically used for unexpected failures.
-
-
 class GeneralError(Exception):
     '''
     General error handler.

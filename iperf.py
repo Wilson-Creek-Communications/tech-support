@@ -1,7 +1,8 @@
 from shell import Remote, Local
 from getpass import getpass
 from logging import basicConfig, getLogger, INFO, DEBUG, WARNING
-from threading import Thread
+from threading import Event, Thread
+from time import sleep
 
 ##########################
 #  Initialize Variables  #
@@ -15,7 +16,8 @@ class RemoteConfig:
     remote_user = input('Username: ')
     remote_pass = getpass()
 
-remote = Remote(RemoteConfig)
+connected = Event()
+remote = Remote(RemoteConfig, connected)
 local = Local()
 
 
@@ -37,11 +39,12 @@ if __name__ == "__main__":
     # Main
     LOGGER.info('Wilson Creek Techsupport Webserver')
     LOGGER.info('Starting...')
-    
+
     remoteThread = Thread(target=remote.execute, args=('iperf -s', 30,))
     localThread = Thread(target=local.run, args=(['iperf2', '-c', RemoteConfig.remote_url, '-r'],))
-    
+
     remoteThread.start()
+    connected.wait()
     localThread.start()
 
     remoteThread.join()

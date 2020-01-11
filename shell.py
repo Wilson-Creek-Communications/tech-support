@@ -8,11 +8,12 @@ from errors import GeneralError, ShellError
 class Remote:
     """Remote host SSH client."""
 
-    def __init__(self, config):
+    def __init__(self, config, connected):
         self.remote_url = config.remote_url
         self.remote_port = config.remote_port
         self.remote_user = config.remote_user
         self.remote_pass = config.remote_pass
+        self.connected = connected
         self.remote = None
         self.LOGGER = getLogger('wilson-creek.remote-shell')
         self.LOGGER.setLevel(DEBUG)
@@ -26,6 +27,7 @@ class Remote:
                 remote.set_missing_host_key_policy(AutoAddPolicy())
                 remote.connect(self.remote_url, port=self.remote_port,
                                username=self.remote_user, password=self.remote_pass)
+                self.connected.set()
             except AuthenticationException:
                 raise AuthenticationException('Authentication failed')
             finally:
@@ -83,6 +85,8 @@ class Local:
 
             if exitcode != 0:
                 raise CalledProcessError(exitcode, command)
+
+            print(process.stdout)
 
             return process
 
