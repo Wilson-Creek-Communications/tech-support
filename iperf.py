@@ -41,7 +41,7 @@ if __name__ == "__main__":
     LOGGER.info('Starting...')
 
     remoteThread = Thread(target=remote.execute, args=('iperf -s', 30,))
-    localThread = Thread(target=local.run, args=(['iperf2', '-c', RemoteConfig.remote_url, '-r'],))
+    localThread = Thread(target=local.run, args=(['iperf', '-c', RemoteConfig.remote_url, '-r'],))
 
     remoteThread.start()
     connected.wait()
