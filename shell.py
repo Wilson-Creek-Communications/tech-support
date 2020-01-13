@@ -39,7 +39,7 @@ class Remote:
         self.remote = self.__connect()
         self.LOGGER.debug('=> %s', cmd)
         try:
-            stdout = self.remote.exec_command(cmd, timeout=timeout)
+            stdin, stdout, stderr = self.remote.exec_command(cmd, timeout=timeout)
 
             self.LOGGER.debug('%r', stdout.readlines())
 
