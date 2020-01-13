@@ -46,7 +46,7 @@ if __name__ == "__main__":
     local_result = [None, []]
 
     # We want to concurrently run shell commands because iperf won't exit until we finish the test
-    remoteThread = Thread(target=remote.execute, args=('iperf -s', remote_result,))                               # Prepare the remote server thread
+    remoteThread = Thread(target=remote.execute, args=('iperf -s', remote_result,))                              # Prepare the remote server thread
     localThread = Thread(target=local.run, args=(['iperf', '-c', RemoteConfig.remote_url, '-r'], local_result,)) # Prepare the local client thread
 
     remoteThread.start() # Queue the iperf server starter thread for the remote device
@@ -59,5 +59,5 @@ if __name__ == "__main__":
     remote.disconnect() # Disconnect from remote
 
     print("RESULTS:")
-    print(remote_result)
-    print(local_result)
+    print("Download: {}".format(local_result[1][10].decode().split('  ')[4]))
+    print("Upload: {}".format(local_result[1][12].decode().split('  ')[4]))
