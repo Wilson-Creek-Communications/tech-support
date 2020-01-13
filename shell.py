@@ -34,12 +34,12 @@ class Remote:
                 return remote
         return self.remote
 
-    def execute(self, cmd, timeout=None):
+    def execute(self, cmd, result, timeout=None):
         """Execute a single unix command."""
         self.remote = self.__connect()
         self.LOGGER.debug('=> %s', cmd)
         try:
-            stdin, stdout, stderr = self.remote.exec_command(cmd, timeout=timeout)
+            stdout = self.remote.exec_command(cmd, timeout=timeout)
 
             self.LOGGER.debug('%r', stdout.readlines())
 
@@ -47,6 +47,9 @@ class Remote:
 
             if exitcode != 0:
                 raise CalledProcessError(exitcode, cmd)
+
+            result.append(exitcode)
+            result.append(stdout.readlines())
 
             return stdout.readlines()
 
@@ -67,7 +70,7 @@ class Local:
         self.LOGGER.setLevel(DEBUG)
 
     # Run a shell command.
-    def run(self, command):
+    def run(self, command, result):
         '''
         A subprocess.Popen wrapper with logging.
         Arguments:
@@ -86,7 +89,8 @@ class Local:
             if exitcode != 0:
                 raise CalledProcessError(exitcode, command)
 
-            print(process.stdout)
+            result.append(exitcode)
+            result.append(process.stdout)
 
             return process
 

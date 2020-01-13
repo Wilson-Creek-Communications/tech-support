@@ -8,17 +8,19 @@ from time import sleep
 #  Initialize Variables  #
 ##########################
 
-LOGGER = getLogger('wilson-creek.techsupport')
-
+# Basic configuration for SSH
 class RemoteConfig:
     remote_url = input('IP Address: ')
     remote_port = 22
     remote_user = input('Username: ')
     remote_pass = getpass()
 
-connected = Event()
-remote = Remote(RemoteConfig, connected)
-local = Local()
+
+LOGGER = getLogger('wilson-creek.techsupport') # Custom logger for our program
+
+connected = Event()                      # Initialize a Thread Event to detect when the remote has connected
+remote = Remote(RemoteConfig, connected) # Initialize a remote shell handler
+local = Local()                          # Initialize a local shell handler
 
 
 ##########
@@ -36,18 +38,26 @@ if __name__ == "__main__":
     # Logger output threshold customization
     LOGGER.setLevel(DEBUG)
 
-    # Main
+    # Let's start!
     LOGGER.info('Wilson Creek Techsupport Webserver')
     LOGGER.info('Starting...')
 
-    remoteThread = Thread(target=remote.execute, args=('iperf -s', 30,))
-    localThread = Thread(target=local.run, args=(['iperf', '-c', RemoteConfig.remote_url, '-r'],))
+    remote_result = []
+    local_result = []
 
-    remoteThread.start()
-    connected.wait()
-    localThread.start()
+    # We want to concurrently run shell commands because iperf won't exit until we finish the test
+    remoteThread = Thread(target=remote.execute, args=('iperf -s', remote_result,))                               # Prepare the remote server thread
+    localThread = Thread(target=local.run, args=(['iperf', '-c', RemoteConfig.remote_url, '-r'], local_result,)) # Prepare the local client thread
 
-    remoteThread.join()
-    localThread.join()
+    remoteThread.start() # Queue the iperf server starter thread for the remote device
+    connected.wait()     # Wait for SSH connection
+    sleep(1)             # Sleep a little while we wait for the server to start
+    localThread.start()  # Queue the iperf client starter thread for the local device
 
-    remote.disconnect()
+    localThread.join() # Wait for speedtest to finish
+
+    remote.disconnect() # Disconnect from remote
+
+    print("RESULTS:")
+    print(remote_result)
+    print(local_result)
