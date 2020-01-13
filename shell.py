@@ -49,7 +49,7 @@ class Remote:
                 raise CalledProcessError(exitcode, cmd)
 
             result.append(exitcode)
-            result.append(stdout.readlines())
+            result.append(stdout)
 
             return stdout.readlines()
 
@@ -80,17 +80,19 @@ class Local:
         try:
             process = Popen(command, stdout=PIPE, stderr=STDOUT)
 
+            result[1] = []
+
             with process.stdout:
                 for stdout in iter(process.stdout.readline, b''):
                     self.LOGGER.debug('%r', stdout)
+                    result[1].append(stdout)
 
             exitcode = process.wait()
 
             if exitcode != 0:
                 raise CalledProcessError(exitcode, command)
 
-            result.append(exitcode)
-            result.append(process.stdout)
+            result[0] = exitcode
 
             return process
 
