@@ -42,8 +42,8 @@ if __name__ == "__main__":
     LOGGER.info('Wilson Creek Techsupport Webserver')
     LOGGER.info('Starting...')
 
-    remote_result = []
-    local_result = []
+    remote_result = [None, []]
+    local_result = [None, []]
 
     # We want to concurrently run shell commands because iperf won't exit until we finish the test
     remoteThread = Thread(target=remote.execute, args=('iperf -s', remote_result,))                               # Prepare the remote server thread
