@@ -98,8 +98,8 @@ class Local(object):
             result[0] = exitcode
             result[1] = stdout_list
 
-            if exitcode != 0:
-                raise CalledProcessError(exitcode, cmd)
+            # if exitcode != 0:
+            #     raise CalledProcessError(exitcode, cmd)
 
             return result
 
