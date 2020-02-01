@@ -2,59 +2,64 @@ from paramiko.auth_handler import AuthenticationException
 from paramiko import SSHClient, AutoAddPolicy
 from logging import getLogger, DEBUG
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-from errors import GeneralError, ShellError
+from classes import GeneralError, ShellError, RemoteConfig
+from typing import List, Any
 
-"""Remote host object."""
-class Remote:
-    """Remote host SSH client."""
 
-    def __init__(self, config, connected):
-        self.remote_url = config.remote_url
-        self.remote_port = config.remote_port
-        self.remote_user = config.remote_user
-        self.remote_pass = config.remote_pass
+class Remote(object):
+    '''Remote host SSH client.'''
+
+    def __init__(self, config: RemoteConfig, connected) -> None:
+        self.config = config
         self.connected = connected
-        self.remote = None
+        self.remote: SSHClient
         self.LOGGER = getLogger('wilson-creek.remote-shell')
         self.LOGGER.setLevel(DEBUG)
 
-    def __connect(self):
-        """Connect to remote."""
-        if self.remote is None:
-            try:
-                remote = SSHClient()
-                remote.load_system_host_keys()
-                remote.set_missing_host_key_policy(AutoAddPolicy())
-                remote.connect(self.remote_url, port=self.remote_port,
-                               username=self.remote_user, password=self.remote_pass)
-                self.connected.set()
-            except AuthenticationException:
-                raise AuthenticationException('Authentication failed')
-            finally:
-                return remote
-        return self.remote
+    def __connect(self) -> None:
+        '''Connect to remote.'''
+        try:
+            self.remote = SSHClient()
+            self.remote.load_system_host_keys()
+            self.remote.set_missing_host_key_policy(AutoAddPolicy())
+            self.remote.connect(self.config.remote_url, port=self.config.remote_port,
+                                username=self.config.remote_user, password=self.config.remote_pass)
+            self.connected.set()
+        except AuthenticationException:
+            raise AuthenticationException('Authentication failed')
 
-    def execute(self, cmd, result, timeout=None):
-        """Execute a single unix command."""
-        self.remote = self.__connect()
+    def execute(self, cmd: str, result: List[Any], timeout: int = None) -> List[Any]:
+        ''''Execute a commmand on a remote system.
+
+        Arguments:
+            cmd: The shell command to run.
+            result: A list that contains the exit code and the stdout of the command.
+            timeout: The amount of time in seconds to wait before giving up on the command to finish on its own.
+        '''
+        self.__connect()
         self.LOGGER.debug('=> %s', cmd)
         try:
-            stdin, stdout, stderr = self.remote.exec_command(cmd, timeout=timeout)
+            stdin: str
+            stdout: str
+            stderr: str
+            stdin, stdout, stderr = self.remote.exec_command(
+                cmd, timeout=timeout)
 
             self.LOGGER.debug('%r', stdout.readlines())
 
             exitcode = stdout.channel.recv_exit_status()
 
+            result[0] = exitcode
+            result[1] = stdout.readlines()
+
             if exitcode != 0:
                 raise CalledProcessError(exitcode, cmd)
 
-            result[0] = exitcode
-            result[1].append(stdout)
-
-            return stdout.readlines()
+            return result
 
         except CalledProcessError as exception:
-            raise ShellError(self.LOGGER, '{} Failed: {}'.format(cmd, exception))
+            raise ShellError(
+                self.LOGGER, '{} Failed: {}'.format(cmd, exception))
         else:
             self.LOGGER.debug('%s finished successfully', cmd)
 
@@ -63,37 +68,43 @@ class Remote:
         self.remote.close()
 
 
-class Local:
+class Local(object):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.LOGGER = getLogger('wilson-creek.local-shell')
         self.LOGGER.setLevel(DEBUG)
 
-    # Run a shell command.
-    def run(self, command, result):
-        '''
-        A subprocess.Popen wrapper with logging.
+    # Execute a shell command locally.
+    def execute(self, cmd: List[str], result: List[Any]) -> List[Any]:
+        '''A subprocess.Popen wrapper with logging.
+
         Arguments:
-            command: The shell command to run.
+            cmd: The shell command to run.
+            result: A list that contains the exit code and the stdout of the command.
         '''
-        self.LOGGER.debug('=> %s', command)
+        self.LOGGER.debug('=> %s', cmd)
         try:
-            process = Popen(command, stdout=PIPE, stderr=STDOUT)
+            process = Popen(cmd, stdout=PIPE, stderr=STDOUT)
+
+            stdout_list: List[str] = []
 
             with process.stdout:
                 for stdout in iter(process.stdout.readline, b''):
                     self.LOGGER.debug('%r', stdout)
-                    result[1].append(stdout)
+                    stdout_list.append(stdout)
 
             exitcode = process.wait()
+
             result[0] = exitcode
+            result[1] = stdout_list
 
             if exitcode != 0:
-                raise CalledProcessError(exitcode, command)
+                raise CalledProcessError(exitcode, cmd)
 
-            return process
+            return result
 
         except CalledProcessError as exception:
-            raise ShellError(self.LOGGER, '{} Failed: {}'.format(command, exception))
+            raise ShellError(
+                self.LOGGER, '{} Failed: {}'.format(cmd, exception))
         else:
-            self.LOGGER.debug('%s finished successfully', command)
+            self.LOGGER.debug('%s finished successfully', cmd)
