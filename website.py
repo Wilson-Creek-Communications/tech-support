@@ -9,7 +9,6 @@ from paramiko import AuthenticationException
 
 app = Flask(__name__)
 app.secret_key = b'\x1f4\x95\xaf\x088\xe2\x01\xd0\x7fN\xda\xfc9\xa9\xb9'
-app.run(host='0.0.0.0')
 
 LOGGER: Logger = getLogger('wilson-creek.techsupport')
 
@@ -64,4 +63,4 @@ if __name__ == '__main__':
 
     # Main
     LOGGER.info('Wilson Creek Techsupport Webserver')
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port='8080')
