@@ -98,7 +98,6 @@ class Local(object):
 
             result[0] = exitcode
             result[1] = stdout_list
-            print(result[1])
 
             if exitcode != 0:
                 raise CalledProcessError(exitcode, cmd)
