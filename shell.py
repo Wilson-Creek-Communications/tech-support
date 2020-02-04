@@ -4,6 +4,7 @@ from logging import getLogger, DEBUG
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 from classes import GeneralError, ShellError, RemoteConfig
 from typing import List, Any
+from socket import gaierror
 
 
 class Remote(object):
@@ -25,7 +26,7 @@ class Remote(object):
             self.remote.connect(self.config.remote_url, port=self.config.remote_port,
                                 username=self.config.remote_user, password=self.config.remote_pass)
             self.connected.set()
-        except AuthenticationException:
+        except (AuthenticationException, gaierror):
             raise AuthenticationException('Authentication failed')
 
     def execute(self, cmd: str, result: List[Any], timeout: int = None) -> List[Any]:
@@ -52,8 +53,8 @@ class Remote(object):
             result[0] = exitcode
             result[1] = stdout.readlines()
 
-            if exitcode != 0:
-                raise CalledProcessError(exitcode, cmd)
+            # if exitcode != 0:
+            #     raise CalledProcessError(exitcode, cmd)
 
             return result
 
@@ -97,9 +98,10 @@ class Local(object):
 
             result[0] = exitcode
             result[1] = stdout_list
+            print(result[1])
 
-            # if exitcode != 0:
-            #     raise CalledProcessError(exitcode, cmd)
+            if exitcode != 0:
+                raise CalledProcessError(exitcode, cmd)
 
             return result
 

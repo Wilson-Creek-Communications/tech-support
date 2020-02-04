@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>iPerf Speedtest</title>
+    <title>iPerf Speed Test</title>
 
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -36,15 +36,15 @@
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
         <header class="demo-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
             <div class="mdl-layout__header-row">
-                <span class="mdl-layout-title">iPerf Speedtest</span>
+                <span class="mdl-layout-title">iPerf Speedtest Results</span>
             </div>
         </header>
         <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-400 material-icons"
-                        role="presentation">home</i>Home</a>
-                <a class="mdl-navigation__link" href="/iperf"><i class="mdl-color-text--blue-grey-400 material-icons"
-                        role="presentation">inbox</i>Speedtest</a>
+                <a class="mdl-navigation__link" href="{{ url_for('index') }}"><i
+                        class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
+                <a class="mdl-navigation__link" href="{{ url_for('test_page') }}"><i
+                        class="mdl-color-text--blue-grey-400 material-icons" role="presentation">inbox</i>Speedtest</a>
                 <div class="mdl-layout-spacer"></div>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons"
                         role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
@@ -53,31 +53,16 @@
         <main class="mdl-layout__content mdl-color--grey-100">
             <div class="mdl-grid demo-content">
                 <div class="mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-grid">
-                    <form action="/iperf_ssh" method="POST">
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="ip_address" name="ip_address">
-                            <label class="mdl-textfield__label" for="ip_address">IP Address...</label>
-                        </div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="port" name="port" value="22">
-                            <label class="mdl-textfield__label" for="port">SSH Port...</label>
-                        </div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="username" name="username"
-                                value="wccAdmin">
-                            <label class="mdl-textfield__label" for="username">Username...</label>
-                        </div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="password" id="password" name="password">
-                            <label class="mdl-textfield__label" for="password">Password...</label>
-                        </div>
-                        <!-- Accent-colored raised button with ripple -->
-                        <button
-                            class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
-                            type="submit">
-                            Submit
-                        </button>
-                    </form>
+                    <h1>
+                        Download: {{ down }}
+                        <br>
+                        Upload: {{ up }}
+                        <br>
+                        <form action="/iperf">
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Test
+                                Again</button>
+                        </form>
+                    </h1>
                 </div>
             </div>
         </main>
