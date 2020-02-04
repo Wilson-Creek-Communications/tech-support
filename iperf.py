@@ -57,4 +57,4 @@ class iperf(object):
 
         self.remote.disconnect()  # Disconnect from remote
 
-        return [local_result[1][10].decode().split('  ')[4], local_result[1][12].decode().split('  ')[4]]
+        return [local_result[1][6].decode().split('  ')[4], local_result[1][8].decode().split('  ')[4]]
