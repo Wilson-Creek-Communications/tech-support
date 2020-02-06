@@ -30,8 +30,9 @@ class ShellError(Exception):
         LOGGER.exception('ShellError: %s', message, *args)
 
 
-class RemoteConfig(object):
+class iPerfConfig(object):
     remote_url: str
     remote_port: int
     remote_user: str
     remote_pass: str
+    tcp_connections: int

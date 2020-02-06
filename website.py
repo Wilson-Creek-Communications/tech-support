@@ -2,9 +2,9 @@
 
 from logging import Logger, getLogger, basicConfig, DEBUG
 from iperf import iperf
-from classes import RemoteConfig
+from classes import iPerfConfig
 from getpass import getpass
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, Response
 from paramiko import AuthenticationException
 
 app = Flask(__name__)
@@ -12,18 +12,16 @@ app.secret_key = b'\x1f4\x95\xaf\x088\xe2\x01\xd0\x7fN\xda\xfc9\xa9\xb9'
 
 LOGGER: Logger = getLogger('wilson-creek.techsupport')
 
-remoteConfig: RemoteConfig = RemoteConfig()
-remoteConfig.remote_port = 22
-remoteConfig.remote_user = 'wccAdmin'
+iPerfConfig: iPerfConfig = iPerfConfig()
 
 
 @app.route('/')
-def index() -> render_template:
+def index():
     return render_template('index.html')
 
 
 @app.route('/iperf')
-def test_page() -> render_template:
+def test_page():
     return render_template('iperf.html')
 
 
@@ -35,18 +33,16 @@ def test_results():
 
 
 @app.route('/iperf_ssh', methods=['POST'])
-def run_test():
-    remoteConfig.remote_url = request.form['ip_address']
-    remoteConfig.remote_port = request.form['port']
-    remoteConfig.remote_user = request.form['username']
-    remoteConfig.remote_pass = request.form['password']
+def run_test() -> Response:
+    iPerfConfig.remote_url = request.form['ip_address']
+    iPerfConfig.remote_port = request.form['port']
+    iPerfConfig.remote_user = request.form['username']
+    iPerfConfig.remote_pass = request.form['password']
+    iPerfConfig.tcp_connections = request.form['connections']
 
-    print(remoteConfig.remote_url, remoteConfig.remote_port,
-          remoteConfig.remote_user, remoteConfig.remote_pass)
+    iPerfController: iperf = iperf(LOGGER, iPerfConfig)
 
-    iperfController: iperf = iperf(LOGGER, remoteConfig)
-
-    results = iperfController.conductTest()
+    results = iPerfController.conductTest()
     return redirect(url_for('test_results', down=results[0], up=results[1]))
 
 

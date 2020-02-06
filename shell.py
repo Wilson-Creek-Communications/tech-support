@@ -1,8 +1,9 @@
 from paramiko.auth_handler import AuthenticationException
 from paramiko import SSHClient, AutoAddPolicy
 from logging import getLogger, DEBUG
+from threading import Event
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
-from classes import GeneralError, ShellError, RemoteConfig
+from classes import GeneralError, ShellError, iPerfConfig
 from typing import List, Any
 from socket import gaierror
 
@@ -10,7 +11,7 @@ from socket import gaierror
 class Remote(object):
     '''Remote host SSH client.'''
 
-    def __init__(self, config: RemoteConfig, connected) -> None:
+    def __init__(self, config: iPerfConfig, connected: Event) -> None:
         self.config = config
         self.connected = connected
         self.remote: SSHClient
@@ -91,13 +92,18 @@ class Local(object):
 
             with process.stdout:
                 for stdout in iter(process.stdout.readline, b''):
-                    self.LOGGER.debug('%r', stdout)
-                    stdout_list.append(stdout)
+                    self.LOGGER.debug('%r', stdout.decode())
+                    stdout_list.append(stdout.decode())
+
+            stdout_str: str = ''
+
+            for string in stdout_list:
+                stdout_str += string
 
             exitcode = process.wait()
 
             result[0] = exitcode
-            result[1] = stdout_list
+            result[1] = stdout_str
 
             if exitcode != 0:
                 raise CalledProcessError(exitcode, cmd)

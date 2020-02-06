@@ -59,7 +59,7 @@
                             <label class="mdl-textfield__label" for="ip_address">IP Address...</label>
                         </div>
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="port" name="port" value="22">
+                            <input class="mdl-textfield__input" type="number" id="port" name="port" value="22">
                             <label class="mdl-textfield__label" for="port">SSH Port...</label>
                         </div>
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -70,6 +70,11 @@
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="password" id="password" name="password">
                             <label class="mdl-textfield__label" for="password">Password...</label>
+                        </div>
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="number" id="connections" name="connections"
+                                value="1">
+                            <label class="mdl-textfield__label" for="connections">Number of TCP Connections...</label>
                         </div>
                         <!-- Accent-colored raised button with ripple -->
                         <button
