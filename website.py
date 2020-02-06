@@ -35,10 +35,10 @@ def test_results():
 @app.route('/iperf_ssh', methods=['POST'])
 def run_test() -> Response:
     iPerfConfig.remote_url = request.form['ip_address']
-    iPerfConfig.remote_port = request.form['port']
+    iPerfConfig.remote_port = int(request.form['port'])
     iPerfConfig.remote_user = request.form['username']
     iPerfConfig.remote_pass = request.form['password']
-    iPerfConfig.tcp_connections = request.form['connections']
+    iPerfConfig.tcp_connections = int(request.form['connections'])
 
     iPerfController: iperf = iperf(LOGGER, iPerfConfig)
 

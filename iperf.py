@@ -26,7 +26,7 @@ class iperf(object):
         self.config: iPerfConfig = config  # Localize the iPerfConfig
         self.LOGGER: Logger = LOGGER  # Localize the logger
 
-        if self.config.remote_url == '' or self.config.remote_user == '' or self.config.remote_pass == '':
+        if self.config.remote_url == '' or self.config.remote_port < 0 or self.config.remote_user == '' or self.config.remote_pass == '' or self.config.tcp_connections < 1:
             raise GeneralError(LOGGER, 'Invalid iPerf Config.')
 
         # Initialize a Thread Event to detect when the remote has connected
