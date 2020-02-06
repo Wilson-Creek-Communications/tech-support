@@ -49,7 +49,7 @@ class iperf(object):
         remoteThread: Thread = Thread(
             target=self.remote.execute, args=('iperf -s', remote_result,))
         localThread: Thread = Thread(target=self.local.execute, args=(
-            ['iperf', '-c', '-r', self.config.remote_url, '-P', str(self.config.tcp_connections)], local_result,))  # Prepare the local client thread
+            ['iperf', '-c', self.config.remote_url, '-r', '-P', str(self.config.tcp_connections)], local_result,))  # Prepare the local client thread
 
         remoteThread.start()   # Queue the iperf server starter thread for the remote device
         self.connected.wait()  # Wait for SSH connection
