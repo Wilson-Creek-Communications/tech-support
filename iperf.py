@@ -7,7 +7,7 @@ from threading import Event, Thread
 from time import sleep
 from classes import iPerfConfig, GeneralError
 from typing import List
-from re import search, Match
+from re import search, Match, finditer
 
 # RegEx to match a string that is like '####.## Mbits/sec', and return only the numbers
 MBIT_PATTERN: str = '([0-9]{1,4}\\.[0-9][0-9])(?= Mbits)'
@@ -36,6 +36,8 @@ class iperf(object):
         # Initialize a local shell handler
         self.local: Local = Local()
 
+        finditer(MBIT_PATTERN)
+
     def conductTest(self) -> List[str]:
         '''Run an iperf test between the computer and the requested remote device.'''
         # Let's start!
@@ -62,11 +64,14 @@ class iperf(object):
         self.remote.disconnect()  # Disconnect from remote
 
         # Get a regex match of all megabit results
-        speeds: Match = search(MBIT_PATTERN, local_result[1])
+        speeds: List = []
+
+        for mbit in finditer(MBIT_PATTERN, local_result[1]):
+            speeds.append(mbit.group(0))
 
         if self.config.tcp_connections > 1:
             # If we have more than 1 tcp connection, return the sums
-            return [speeds.group(self.config.tcp_connections), speeds.group((self.config.tcp_connections * 2) + 1)]
+            return [speeds[self.config.tcp_connections], speeds[(self.config.tcp_connections * 2) + 1)]]
 
         # Otherwise, return the result
-        return [speeds.group(0), speeds.group(1)]
+        return [speeds[0], speeds[1]]
